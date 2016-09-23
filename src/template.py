@@ -34,7 +34,7 @@ class Geometry:
 		del self.cubes[:]
 		# make a few translated cubes
 		for i in range(4):
-			print "building cube", i
+			print('building cube', i)
 			self.cubes.append(self.buildCube(i*3))
 
 	def buildCube(self,translation):

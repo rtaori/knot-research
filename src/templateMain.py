@@ -19,18 +19,18 @@ TODO: figure out what to put in this list to make
 the edges draw properly
 '''
 edges = [
-[0,4],
-[1,5],
-[2,6],
-[3,7],
 [0,1],
 [1,2],
 [2,3],
-[1,4],
+[3,0],
 [4,5],
 [5,6],
 [6,7],
-[7,4]
+[7,4],
+[0,7],
+[1,6],
+[2,5],
+[3,4],
 ]
 
 
