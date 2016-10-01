@@ -36,7 +36,7 @@ azims = [0,0,0,-45.0,0]
 utx = 55
 uty = 0
 utz = 0
-ux = 03
+ux = 3
 uy = 0
 uz = 0
 
