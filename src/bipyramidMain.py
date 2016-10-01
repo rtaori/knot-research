@@ -1,4 +1,3 @@
-
 from OpenGL.GLUT import *
 from OpenGL.GLU import *
 from OpenGL.GL import *
@@ -6,7 +5,7 @@ import sys
 import math
 import transform
 import numpy as np
-import template as bd
+import bipyramid as bd
 eye = np.array([0.0,-13.0,1.5])
 up = np.array([0.0,0.0,1.0])
 
@@ -14,23 +13,33 @@ prevX = 0
 prevY = 0
 r = 0
 
-'''
-TODO: figure out what to put in this list to make
-the edges draw properly
-'''
 edges = [
+# top edges
 [0,1],
-[1,2],
-[2,3],
-[3,0],
+[0,2],
+[0,3],
+#bottom edges
 [4,5],
-[5,6],
-[6,7],
-[7,4],
-[0,7],
-[1,6],
-[2,5],
-[3,4],
+[4,6],
+[4,7],
+# line outs
+[8,9],
+[10,11],
+[12,13],
+#top edges to line outs
+[1,11],
+[3,10],
+[1,13],
+[2,12],
+[2,9],
+[3,8],
+#bottom edges to line outs
+[5,11],
+[5,13],
+[6,9],
+[6,12],
+[7,8],
+[7,10],
 ]
 
 
@@ -74,7 +83,7 @@ def mainDisplay():
 
 		glBegin(GL_LINES)
 		#color the for lines you're about to draw
-		glColor3f(1.0, 0.0, 0.0);
+		glColor3f(1.0, 1.0, 1.0);
 		for edge in edges:
 			for v in edge:
 				glVertex3fv(cube[v])
@@ -114,6 +123,7 @@ def keyboard(key,x,y):
 	if key == 27:
 		exit(0)
 	elif key == "+":
+		print('askldfjasdfjasld;f')
 		# move first cube over in positive x
 		geom.extraTranslation += 0.2
 	elif key == "-":
