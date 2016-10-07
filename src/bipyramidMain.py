@@ -1,6 +1,7 @@
 from OpenGL.GLUT import *
 from OpenGL.GLU import *
 from OpenGL.GL import *
+from Tkinter import *
 import sys
 import math
 import transform
@@ -46,113 +47,123 @@ edges = [
 geom = bd.Geometry()
 
 def init():
-	glClearColor(0.0, 0.0, 0.0, 1.0); # Set background color to black and opaque
-	glClearDepth(1.0);                   # Set background depth to farthest
-	glEnable(GL_DEPTH_TEST);   # Enable depth testing for z-culling
-	glDepthFunc(GL_LEQUAL);    # Set the type of depth-test
-	glShadeModel(GL_SMOOTH);   # Enable smooth shading
-	glHint(GL_PERSPECTIVE_CORRECTION_HINT, GL_NICEST);
+    glClearColor(0.0, 0.0, 0.0, 1.0); # Set background color to black and opaque
+    glClearDepth(1.0);                   # Set background depth to farthest
+    glEnable(GL_DEPTH_TEST);   # Enable depth testing for z-culling
+    glDepthFunc(GL_LEQUAL);    # Set the type of depth-test
+    glShadeModel(GL_SMOOTH);   # Enable smooth shading
+    glHint(GL_PERSPECTIVE_CORRECTION_HINT, GL_NICEST);
+
 
 def mainDisplay():
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
 
-	glMatrixMode(GL_MODELVIEW)
-	glLoadIdentity()
+    glMatrixMode(GL_MODELVIEW)
+    glLoadIdentity()
 
-	gluLookAt(eye[0],eye[1],eye[2],  0,0,0,  up[0],up[1],up[2])
-	glBegin(GL_LINES)
-	# x axis
-	glColor3f(1.0, 0.0, 0.0) 
-	glVertex3f(0.0,0.0,0.0)
-	glVertex3f(10.0,0.0,0.0)
-	# y axis
-	glColor3f(0.0,1.0,0.0)
-	glVertex3f(0.0,0.0,0.0)
-	glVertex3f(0.0,10.0,0.0)
-	# z axis
-	glColor3f(0.0,0.0,1.0)
-	glVertex3f(0.0,0.0,0.0)
-	glVertex3f(0.0,0.0,10.0)
+    gluLookAt(eye[0],eye[1],eye[2],  0,0,0,  up[0],up[1],up[2])
+    glBegin(GL_LINES)
+    # x axis
+    glColor3f(0.5, 1.0, 1.0) 
+    glVertex3f(0.0,0.0,0.0)
+    glVertex3f(15.0,0.0,0.0)
+    # y axis
+    glColor3f(1.0, 0.5, 1.0) 
+    glVertex3f(0.0,0.0,0.0)
+    glVertex3f(0.0,15.0,0.0)
+    # z axis
+    glColor3f(1.0, 1.0, 0.5) 
+    glVertex3f(0.0,0.0,0.0)
+    glVertex3f(0.0,0.0,15.0)
 
-	glEnd()
+    glEnd()
 
-	#Draw Geometry
-	global geom
-	geom.buildGeometry()
-	for cube in geom.cubes:
+    #Draw Geometry
+    global geom
+    geom.buildGeometry()
+    l_cost = geom.length_cost(1)
+    print('length cost: ' + str(l_cost))
+    a_cost = geom.angle_cost(1)
+    print('angle cost: ' + str(a_cost))
+    # p_cost = geom.planarity_cost(1)
+    # print('planarity cost: ' + str(p_cost))
+    # t_cost = l_cost + a_cost + p_cost
+    # print('total cost: ' + t_cost)
 
-		glBegin(GL_LINES)
-		#color the for lines you're about to draw
-		glColor3f(1.0, 1.0, 1.0);
-		for edge in edges:
-			for v in edge:
-				glVertex3fv(cube[v])
-		glEnd()
+    glBegin(GL_LINES)
 
-	glutSwapBuffers()
+    for i in range(len(edges)):
+        if i == 0:
+            glColor3f(1.0, 0.0, 0.0) 
+        elif i == 6:
+            glColor3f(0.0,1.0,0.0)
+        elif i == 9:
+            glColor3f(0.0,0.0,1.0)
+        for v in edges[i]:
+            glVertex3fv(geom.solid[v])
+    glEnd()
+
+    glutSwapBuffers()
 
 def mainReshape(w,h):
-	if h == 0:
-		h = 1
-	glViewport(0, 0, w, h)
-	glMatrixMode(GL_PROJECTION)
-	glLoadIdentity() 
-	gluPerspective(45, float(w) / h, 0.1, 100)
-	glMatrixMode(GL_MODELVIEW)
-	glLoadIdentity()
+    if h == 0:
+        h = 1
+    glViewport(0, 0, w, h)
+    glMatrixMode(GL_PROJECTION)
+    glLoadIdentity() 
+    gluPerspective(45, float(w) / h, 0.1, 100)
+    glMatrixMode(GL_MODELVIEW)
+    glLoadIdentity()
 
 def idle():
-	glutPostRedisplay()
+    glutPostRedisplay()
 
 def drag(x,y):
-	global prevX
-	global prevY
-	global eye
-	global up
-	diffX = x - prevX
-	diffY = -y + prevY
-	eye = transform.left(diffX,eye,up)
-	eye, up = transform.up(diffY,eye,up)
+    global prevX
+    global prevY
+    global eye
+    global up
+    diffX = x - prevX
+    diffY = -y + prevY
+    eye = transform.left(diffX,eye,up)
+    eye, up = transform.up(diffY,eye,up)
 
-	prevX = x
-	prevY = y
-	glutPostRedisplay()
+    prevX = x
+    prevY = y
+    glutPostRedisplay()
 
 def keyboard(key,x,y):
-	global geom
-	if key == 27:
-		exit(0)
-	elif key == "+":
-		print('askldfjasdfjasld;f')
-		# move first cube over in positive x
-		geom.extraTranslation += 0.2
-	elif key == "-":
-		# move first cube over in negative x
-		geom.extraTranslation -= 0.2
-	
-	glutPostRedisplay()
+    global geom
+    if key == 27:
+        exit(0)
+    elif key == "=":
+        geom.extraTranslation += 0.2
+    elif key == "-":
+        geom.extraTranslation -= 0.2
+    
+    glutPostRedisplay()
 
 
 def mouse(button,state,x,y):
-	global prevX
-	global prevY
-	if state == 1:
-		prevX = 0
-		prevY = 0
+    global prevX
+    global prevY
+    if state == 1:
+        prevX = 0
+        prevY = 0
 
 def main():
-	glutInit(sys.argv)
-	glutInitDisplayMode(GLUT_DOUBLE)
-	glutInitWindowSize(640, 480)
-	glutInitWindowPosition(0, 0)
-	glutCreateWindow("Cubes??")
-	glutDisplayFunc(mainDisplay)
-	glutReshapeFunc(mainReshape)
-	glutMotionFunc(drag)
-	glutMouseFunc(mouse)
-	glutKeyboardFunc(keyboard)
-	init()
-	glutMainLoop()
-	return
+    glutInit(sys.argv)
+    glutInitDisplayMode(GLUT_DOUBLE)
+    glutInitWindowSize(640, 480)
+    glutInitWindowPosition(0, 0)
+    glutCreateWindow("Solid")
+    glutDisplayFunc(mainDisplay)
+    glutReshapeFunc(mainReshape)
+    glutMotionFunc(drag)
+    glutMouseFunc(mouse)
+    glutKeyboardFunc(keyboard)
+    init()
+    glutMainLoop()
+    return
 
 if __name__ == '__main__': main()
