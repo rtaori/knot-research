@@ -54,17 +54,13 @@ def init():
     glShadeModel(GL_SMOOTH);   # Enable smooth shading
     glHint(GL_PERSPECTIVE_CORRECTION_HINT, GL_NICEST);
 
-
 def print_stats():
     l_cost = geom.length_cost(1)
-    print('length cost: ' + str(l_cost))
     a_cost = geom.angle_cost(1)
-    print('angle cost: ' + str(a_cost))
-    # p_cost = geom.planarity_cost(1)
-    # print('planarity cost: ' + str(p_cost))
-    # t_cost = l_cost + a_cost + p_cost
-    # print('total cost: ' + t_cost)
-
+    p_cost = geom.planarity_cost(1)
+    t_cost = l_cost + a_cost + p_cost
+    print('length cost: ' + str(l_cost), 'angle cost: ' + str(a_cost), \
+        'planarity cost: ' + str(p_cost), 'total cost: ' + str(t_cost))
 
 def mainDisplay():
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
@@ -159,7 +155,6 @@ def keyboard(key,x,y):
         geom.line_out -= scale_multiple
 
     glutPostRedisplay()
-
 
 def mouse(button,state,x,y):
     global prevX

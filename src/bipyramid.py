@@ -100,10 +100,10 @@ class Geometry:
 
 		def angle(vec1, vec2):
 
-			def magnitude(vec1):
+			def magnitude(vec):
 				sum = 0
-				for i in range(len(vec1)):
-					sum += vec1[i] ** 2
+				for i in range(len(vec)):
+					sum += vec[i] ** 2
 				return sqrt(sum)
 
 			numer = 0
@@ -139,7 +139,8 @@ class Geometry:
 		line_out_edge = vectorize(self.plist[13], self.plist[12])
 		line_angle = angle(top_edge_1, line_out_edge)
 
-		pentagon_devation = abs(top_angle - s_pentagon) + 2 * abs(side_angle - s_pentagon) + 2 * abs(line_angle - s_pentagon)
+		pentagon_devation = abs(top_angle - s_pentagon) + 2 * abs(side_angle - s_pentagon) \
+							+ 2 * abs(line_angle - s_pentagon)
 		sum_deviations += 6 * pentagon_devation
 
 		# for the squares
@@ -160,9 +161,43 @@ class Geometry:
 
 
 	def planarity_cost(self, weight):
-		pass
 
-		
+		def best_fit_plane(plist):
+			a, b, c = 0, 0, 0
+			p = (0, 0, 0)
+			n = len(plist)
+
+			for i in range(n):
+				a += (plist[i][1] - plist[(i+1) % n][1]) * (plist[i][2] + plist[(i+1) % n][2])
+				b += (plist[i][2] - plist[(i+1) % n][2]) * (plist[i][0] + plist[(i+1) % n][0])
+				c += (plist[i][0] - plist[(i+1) % n][0]) * (plist[i][1] + plist[(i+1) % n][1])
+				p = tuple(p[x] + plist[i][x] for x in range(len(p)))
+
+			p = tuple(p[x] / n for x in range(len(p)))
+
+			d = -a * p[0] - b * p[1] - c * p[2]
+
+			return (a, b, c, d)
+
+		def distance(point, plane):
+			d = abs(plane[0]*point[0] + plane[1]*point[1] + plane[2]*point[2] + plane[3])
+			d /= sqrt(plane[0]**2 + plane[1]**2 + plane[2]**2)
+			return d
+
+		plane = best_fit_plane(self.plist)
+
+		planarity = 0
+		for point in self.plist:
+			planarity += distance(point, plane)
+
+		return planarity * weight
+
+
+
+
+
+
+
 		
 
 
