@@ -8,62 +8,72 @@ class Geometry:
 	origin, xaxis, yaxis, zaxis = (0, 0, 0), (1, 0, 0), (0, 1, 0), (0, 0, 1)
 
 
-	# CHANGEABLE PARAMETERS
-	scale = 1.5
-	top_height = 1.75 * scale
-	square_tip_out = 1.25 * scale
-	square_tip_up = 1 * scale
-	line_out = 1.5 * scale
-
-
-	plist = []
-
-	# top half top point
-	plist.append([0, 0, top_height])
-
-	# calculations for top and bottom halves
-	x_dist = sqrt(3) * square_tip_out / 2.0
-	y_dist = square_tip_out / 2.0
-
-	# top half corner top points
-	plist.append([0, square_tip_out, square_tip_up])
-	plist.append([-x_dist, -y_dist, square_tip_up])
-	plist.append([x_dist, -y_dist, square_tip_up])
-
-	# bottom half bottom point
-	plist.append([0, 0, -top_height])
-
-	# bottom half corner bottom points
-	plist.append([0, square_tip_out, -square_tip_up])
-	plist.append([-x_dist, -y_dist, -square_tip_up])
-	plist.append([x_dist, -y_dist, -square_tip_up])
-
-	# calculations for connector line points
-	x_offset = scale / 4.0
-	y_offset = scale * sqrt(3) / 4.0
-	x_coord = line_out * sqrt(3) / 2.0
-	y_coord = line_out / 2.0
-
-	# bottom bar connector line points
-	plist.append([scale/2.0, -line_out, 0])
-	plist.append([-scale/2.0, -line_out, 0])
-
-	# wing connector line points
-	plist.append([x_coord + x_offset, y_coord - y_offset, 0])
-	plist.append([x_coord - x_offset, y_coord + y_offset, 0])
-	plist.append([-x_coord - x_offset, y_coord - y_offset, 0])
-	plist.append([-x_coord + x_offset, y_coord + y_offset, 0])
-
-
 	def __init__(self):
 		self.solid = []
 		self.extraTranslation = 0
+		self.plist = []
+
+		self.scale = 2
+		# CHANGEABLE PARAMETERS
+		self.top_height = 1.75 * self.scale
+		self.square_tip_out = 1.25 * self.scale
+		self.square_tip_up = 1 * self.scale
+		self.line_out = 1.5 * self.scale
+
+
+	def scale_all(self, value):
+		self.scale += value
+		self.top_height = 1.75 * self.scale
+		self.square_tip_out = 1.25 * self.scale
+		self.square_tip_up = 1 * self.scale
+		self.line_out = 1.5 * self.scale
+
 
 	'''Building Section'''
 
+	def redraw(self):
+		del self.plist[:]
+
+		# top half top point
+		self.plist.append([0, 0, self.top_height])
+
+		# calculations for top and bottom halves
+		x_dist = sqrt(3) * self.square_tip_out / 2.0
+		y_dist = self.square_tip_out / 2.0
+
+		# top half corner top points
+		self.plist.append([0, self.square_tip_out, self.square_tip_up])
+		self.plist.append([-x_dist, -y_dist, self.square_tip_up])
+		self.plist.append([x_dist, -y_dist, self.square_tip_up])
+
+		# bottom half bottom point
+		self.plist.append([0, 0, -self.top_height])
+
+		# bottom half corner bottom points
+		self.plist.append([0, self.square_tip_out, -self.square_tip_up])
+		self.plist.append([-x_dist, -y_dist, -self.square_tip_up])
+		self.plist.append([x_dist, -y_dist, -self.square_tip_up])
+
+		# calculations for connector line points
+		x_offset = self.scale / 4.0
+		y_offset = self.scale * sqrt(3) / 4.0
+		x_coord = self.line_out * sqrt(3) / 2.0
+		y_coord = self.line_out / 2.0
+
+		# bottom bar connector line points
+		self.plist.append([self.scale/2.0, -self.line_out, 0])
+		self.plist.append([-self.scale/2.0, -self.line_out, 0])
+
+		# wing connector line points
+		self.plist.append([x_coord + x_offset, y_coord - y_offset, 0])
+		self.plist.append([x_coord - x_offset, y_coord + y_offset, 0])
+		self.plist.append([-x_coord - x_offset, y_coord - y_offset, 0])
+		self.plist.append([-x_coord + x_offset, y_coord + y_offset, 0])
+
+
 	def buildGeometry(self):
-		points = np.array(Geometry.plist) + np.array([self.extraTranslation, 0, 0])
-		self.solid = points
+		self.redraw()
+		self.solid = np.array(self.plist)
 
 	def length_cost(self, weight):
 
@@ -104,7 +114,6 @@ class Geometry:
 
 			fraction = numer / denom
 
-			print('degrees: ' + str(degrees(acos(fraction))))
 			return acos(fraction)
 
 		def vectorize(point1, point2):
@@ -151,6 +160,9 @@ class Geometry:
 
 
 	def planarity_cost(self, weight):
+		pass
+
+		
 		
 
 

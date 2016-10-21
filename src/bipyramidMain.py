@@ -1,7 +1,6 @@
 from OpenGL.GLUT import *
 from OpenGL.GLU import *
 from OpenGL.GL import *
-from Tkinter import *
 import sys
 import math
 import transform
@@ -43,6 +42,7 @@ edges = [
 [7,10],
 ]
 
+scale_multiple = 0.05
 
 geom = bd.Geometry()
 
@@ -53,6 +53,17 @@ def init():
     glDepthFunc(GL_LEQUAL);    # Set the type of depth-test
     glShadeModel(GL_SMOOTH);   # Enable smooth shading
     glHint(GL_PERSPECTIVE_CORRECTION_HINT, GL_NICEST);
+
+
+def print_stats():
+    l_cost = geom.length_cost(1)
+    print('length cost: ' + str(l_cost))
+    a_cost = geom.angle_cost(1)
+    print('angle cost: ' + str(a_cost))
+    # p_cost = geom.planarity_cost(1)
+    # print('planarity cost: ' + str(p_cost))
+    # t_cost = l_cost + a_cost + p_cost
+    # print('total cost: ' + t_cost)
 
 
 def mainDisplay():
@@ -81,14 +92,6 @@ def mainDisplay():
     #Draw Geometry
     global geom
     geom.buildGeometry()
-    l_cost = geom.length_cost(1)
-    print('length cost: ' + str(l_cost))
-    a_cost = geom.angle_cost(1)
-    print('angle cost: ' + str(a_cost))
-    # p_cost = geom.planarity_cost(1)
-    # print('planarity cost: ' + str(p_cost))
-    # t_cost = l_cost + a_cost + p_cost
-    # print('total cost: ' + t_cost)
 
     glBegin(GL_LINES)
 
@@ -104,6 +107,8 @@ def mainDisplay():
     glEnd()
 
     glutSwapBuffers()
+
+    print_stats()
 
 def mainReshape(w,h):
     if h == 0:
@@ -136,11 +141,23 @@ def keyboard(key,x,y):
     global geom
     if key == 27:
         exit(0)
-    elif key == "=":
-        geom.extraTranslation += 0.2
-    elif key == "-":
-        geom.extraTranslation -= 0.2
-    
+    elif key == '1':
+        geom.top_height += scale_multiple
+    elif key == '!':
+        geom.top_height -= scale_multiple
+    elif key == '2':
+        geom.square_tip_out += scale_multiple
+    elif key == '@':
+        geom.square_tip_out -= scale_multiple
+    elif key == '3':
+        geom.square_tip_up += scale_multiple
+    elif key == '#':
+        geom.square_tip_up -= scale_multiple
+    elif key == '4':
+        geom.line_out += scale_multiple
+    elif key == '$':
+        geom.line_out -= scale_multiple
+
     glutPostRedisplay()
 
 
@@ -167,3 +184,12 @@ def main():
     return
 
 if __name__ == '__main__': main()
+
+
+
+
+
+
+
+
+
