@@ -55,10 +55,7 @@ def init():
     glHint(GL_PERSPECTIVE_CORRECTION_HINT, GL_NICEST);
 
 def print_stats():
-    l_cost = geom.length_cost(1)
-    a_cost = geom.angle_cost(1)
-    p_cost = geom.planarity_cost(1)
-    t_cost = l_cost + a_cost + p_cost
+    l_cost, a_cost, p_cost, t_cost = geom.cost()
     print('length cost: ' + str(l_cost), 'angle cost: ' + str(a_cost), \
         'planarity cost: ' + str(p_cost), 'total cost: ' + str(t_cost))
 
@@ -153,6 +150,8 @@ def keyboard(key,x,y):
         geom.line_out += scale_multiple
     elif key == '$':
         geom.line_out -= scale_multiple
+    elif key == 'g':
+        geom.gradient_descent()
 
     glutPostRedisplay()
 
@@ -179,6 +178,24 @@ def main():
     return
 
 if __name__ == '__main__': main()
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

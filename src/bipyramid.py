@@ -7,29 +7,23 @@ class Geometry:
 
 	origin, xaxis, yaxis, zaxis = (0, 0, 0), (1, 0, 0), (0, 1, 0), (0, 0, 1)
 
+	wiggle_size = 10e-5
+	step_size = 1e1
 
 	def __init__(self):
 		self.solid = []
-		self.extraTranslation = 0
 		self.plist = []
 
 		self.scale = 2
 		# CHANGEABLE PARAMETERS
 		self.top_height = 1.75 * self.scale
-		self.square_tip_out = 1.25 * self.scale
-		self.square_tip_up = 1 * self.scale
+		self.square_tip_out = 2 * self.scale
+		self.square_tip_up = 5 * self.scale
 		self.line_out = 1.5 * self.scale
 
-
-	def scale_all(self, value):
-		self.scale += value
-		self.top_height = 1.75 * self.scale
-		self.square_tip_out = 1.25 * self.scale
-		self.square_tip_up = 1 * self.scale
-		self.line_out = 1.5 * self.scale
-
-
-	'''Building Section'''
+	def buildGeometry(self):
+		self.redraw()
+		self.solid = np.array(self.plist)
 
 	def redraw(self):
 		del self.plist[:]
@@ -70,12 +64,49 @@ class Geometry:
 		self.plist.append([-x_coord - x_offset, y_coord - y_offset, 0])
 		self.plist.append([-x_coord + x_offset, y_coord + y_offset, 0])
 
-
-	def buildGeometry(self):
+	def gradient_descent(self):
 		self.redraw()
-		self.solid = np.array(self.plist)
+		norm_cost = self.cost()[3]
 
-	def length_cost(self, weight):
+		self.top_height += self.wiggle_size
+		self.redraw()
+		top_height_cost = self.cost()[3] - norm_cost
+		top_height_step = top_height_cost * self.step_size * -1
+		self.top_height -= self.wiggle_size
+
+		self.square_tip_out += self.wiggle_size
+		self.redraw()
+		square_tip_out_cost = self.cost()[3] - norm_cost
+		square_tip_out_step = square_tip_out_cost * self.step_size * -1
+		self.square_tip_out -= self.wiggle_size
+
+		self.square_tip_up += self.wiggle_size
+		self.redraw()
+		square_tip_up_cost = self.cost()[3] - norm_cost
+		square_tip_up_step = square_tip_up_cost * self.step_size * -1
+		self.square_tip_up -= self.wiggle_size
+
+		self.line_out += self.wiggle_size
+		self.redraw()
+		line_out_cost = self.cost()[3] - norm_cost
+		line_out_step = line_out_cost * self.step_size * -1
+		self.line_out -= self.wiggle_size
+
+		self.top_height += top_height_step
+		self.square_tip_out += square_tip_out_step
+		self.square_tip_up += square_tip_up_step
+		self.line_out += line_out_step
+
+		print(str(square_tip_out_step))
+
+		self.redraw()
+
+	def cost(self):
+		a, b, c = self.length_cost(), self.angle_cost(), self.planarity_cost()
+		t = a + b + c
+		return (a, b, c, t)
+
+	def length_cost(self, weight=1):
 
 		def distance(point1, point2):
 			diff = 0
@@ -95,8 +126,7 @@ class Geometry:
 		diff_total = diff_tops + diff_squares + diff_outs
 		return diff_total * weight
 
-
-	def angle_cost(self, weight):
+	def angle_cost(self, weight=1):
 
 		def angle(vec1, vec2):
 
@@ -124,7 +154,7 @@ class Geometry:
 
 		sum_deviations = 0
 
-		# for the pentagon
+		# for the pentagons
 		s_pentagon = 108 * 2 * pi / 360
 
 		top_edge_1 = vectorize(self.plist[0], self.plist[1])
@@ -159,8 +189,7 @@ class Geometry:
 
 		return sum_deviations * weight
 
-
-	def planarity_cost(self, weight):
+	def planarity_cost(self, weight=1):
 
 		def best_fit_plane(plist):
 			a, b, c = 0, 0, 0
