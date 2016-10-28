@@ -75,7 +75,7 @@ class Geometry:
         elif self.cost_change == None:
             self.gradient_descent()
             cost = self.cost()[3]
-            self.cost_change = self.prev_cost - cost
+            self.cost_change = (self.prev_cost - cost) / self.step_size
             self.prev_cost = cost
 
         # take most beneficial step
@@ -83,24 +83,23 @@ class Geometry:
             values = (self.top_height, self.square_tip_out, self.square_tip_up, self.line_out)
             self.gradient_descent()
             cost = self.cost()[3]
-            decrease = self.prev_cost - cost
-            print(str(self.prev_cost), str(cost), str(decrease))
+            decrease = (self.prev_cost - cost) / self.step_size
 
-            # if step is harmful, cut in half and try again
+            if abs(self.prev_cost - cost) < 0.5:
+                print('Finished optimizing!')
+
             if decrease < 0:
                 self.step_size /= 1.02
-                self.top_height, self.square_tip_out, self.square_tip_up, self.line_out = values
+
+            # if step is better than last step
+            elif decrease > self.cost_change:
+                self.step_size *= 1
+                # self.step_size *= 1.01
+
+            # if step is not as good but still beneficial
             else:
-
-                # if step is better than last step
-                if decrease > self.cost_change:
-                    self.step_size *= 1.0
-
-                # if step is not as good but still beneficial
-                else:
-                    if decrease < 2 * self.cost_change:
-                        self.step_size /= 1.0
-                        self.wiggle_size /= 1.00
+                self.step_size /= 1.01
+                self.wiggle_size /= 1.001
 
             self.cost_change, self.prev_cost = decrease, cost
 
