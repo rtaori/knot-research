@@ -21,6 +21,9 @@ class Geometry:
 		self.square_tip_up = 5 * self.scale
 		self.line_out = 1.5 * self.scale
 
+		# cost function weights
+		self.alpha, self.beta, self.gamma = 1, 1, 1
+
 	def buildGeometry(self):
 		self.redraw()
 		self.solid = np.array(self.plist)
@@ -97,8 +100,6 @@ class Geometry:
 		self.square_tip_up += square_tip_up_step
 		self.line_out += line_out_step
 
-		print(str(square_tip_out_step))
-
 		self.redraw()
 
 	def cost(self):
@@ -106,7 +107,7 @@ class Geometry:
 		t = a + b + c
 		return (a, b, c, t)
 
-	def length_cost(self, weight=1):
+	def length_cost(self):
 
 		def distance(point1, point2):
 			diff = 0
@@ -124,7 +125,7 @@ class Geometry:
 		diff_outs = abs(out_line - self.scale) * 4
 
 		diff_total = diff_tops + diff_squares + diff_outs
-		return diff_total * weight
+		return diff_total * self.alpha
 
 	def angle_cost(self, weight=1):
 
@@ -187,7 +188,7 @@ class Geometry:
 		square_deviation = abs(top_angle - s_square) * 2 + abs(edge_angle - s_square) * 2
 		sum_deviations += 3 * square_deviation
 
-		return sum_deviations * weight
+		return sum_deviations * self.beta
 
 	def planarity_cost(self, weight=1):
 
@@ -219,7 +220,7 @@ class Geometry:
 		for point in self.plist:
 			planarity += distance(point, plane)
 
-		return planarity * weight
+		return planarity * self.gamma
 
 
 

@@ -150,6 +150,18 @@ def keyboard(key,x,y):
         geom.line_out += scale_multiple
     elif key == '$':
         geom.line_out -= scale_multiple
+    elif key == 'a':
+        geom.alpa += scale_multiple
+    elif key == 'A':
+        geom.alpa -= scale_multiple
+    elif key == 's':
+        geom.beta += scale_multiple
+    elif key == 'S':
+        geom.beta -= scale_multiple
+    elif key == 'd':
+        geom.gamma += scale_multiple
+    elif key == 'D':
+        geom.gamma -= scale_multiple
     elif key == 'g':
         geom.gradient_descent()
 
