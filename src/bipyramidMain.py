@@ -43,6 +43,7 @@ edges = [
 ]
 
 scale_multiple = 0.05
+weight_multiple = 1.05
 
 geom = bd.Geometry()
 
@@ -151,17 +152,17 @@ def keyboard(key,x,y):
     elif key == '$':
         geom.line_out -= scale_multiple
     elif key == 'a':
-        geom.alpa += scale_multiple
+        geom.alpha *= weight_multiple
     elif key == 'A':
-        geom.alpa -= scale_multiple
+        geom.alpha /= weight_multiple
     elif key == 's':
-        geom.beta += scale_multiple
+        geom.beta *= weight_multiple
     elif key == 'S':
-        geom.beta -= scale_multiple
+        geom.beta /= weight_multiple
     elif key == 'd':
-        geom.gamma += scale_multiple
+        geom.gamma *= weight_multiple
     elif key == 'D':
-        geom.gamma -= scale_multiple
+        geom.gamma /= weight_multiple
     elif key == 'g':
         geom.gradient_descent()
 
