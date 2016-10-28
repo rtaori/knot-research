@@ -7,15 +7,11 @@ class Geometry:
 
     origin, xaxis, yaxis, zaxis = (0, 0, 0), (1, 0, 0), (0, 1, 0), (0, 0, 1)
 
-    wiggle_size = 10e-5
-    step_size = 0.5
-
     def __init__(self):
-        self.solid = []
-        self.plist = []
+        self.solid, self.plist = [], []
 
-        self.scale = 2
         # CHANGEABLE PARAMETERS
+        self.scale = 2
         self.top_height = 1.75 * self.scale
         self.square_tip_out = 1.25 * self.scale
         self.square_tip_up = 1 * self.scale
@@ -23,6 +19,10 @@ class Geometry:
 
         # cost function weights
         self.alpha, self.beta, self.gamma = 50, 50, 1.0/3
+
+        # for gradient descent
+        self.wiggle_size, self.step_size = 10e-5, 0.5
+        self.prev_cost, self.cost_change = None, None
 
     def buildGeometry(self):
         self.redraw()
@@ -67,10 +67,47 @@ class Geometry:
         self.plist.append([-x_coord - x_offset, y_coord - y_offset, 0])
         self.plist.append([-x_coord + x_offset, y_coord + y_offset, 0])
 
+    def take_step(self):
+
+        #handle first two calls to set up comparisons for future
+        if self.prev_cost == None:
+            self.prev_cost = self.cost()[3]
+        elif self.cost_change == None:
+            self.gradient_descent()
+            cost = self.cost()[3]
+            self.cost_change = (self.prev_cost - cost) / self.step_size
+            self.prev_cost = cost
+
+        # take most beneficial step
+        else:
+            values = (self.top_height, self.square_tip_out, self.square_tip_up, self.line_out)
+            self.gradient_descent()
+            cost = self.cost()[3]
+            decrease = (self.prev_cost - cost) / self.step_size
+
+            if abs(self.prev_cost - cost) < 0.5:
+                print('Finished optimizing!')
+
+            if decrease < 0:
+                self.step_size /= 1.02
+
+            # if step is better than last step
+            elif decrease > self.cost_change:
+                self.step_size *= 1
+                # self.step_size *= 1.01
+
+            # if step is not as good but still beneficial
+            else:
+                self.step_size /= 1.01
+                self.wiggle_size /= 1.001
+
+            self.cost_change, self.prev_cost = decrease, cost
+
     def gradient_descent(self):
         self.redraw()
         norm_cost = self.cost()[3]
 
+        # figure out contribution to cost function by each parameter
         self.top_height += self.wiggle_size
         self.redraw()
         top_height_cost = self.cost()[3] - norm_cost
@@ -95,6 +132,7 @@ class Geometry:
         line_out_step = line_out_cost * self.step_size * -1
         self.line_out -= self.wiggle_size
 
+        # take gradient descent step in direction of most decrease
         self.top_height += top_height_step
         self.square_tip_out += square_tip_out_step
         self.square_tip_up += square_tip_up_step
