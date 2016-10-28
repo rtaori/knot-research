@@ -18,7 +18,7 @@ class Geometry:
         self.line_out = 1.5 * self.scale
 
         # cost function weights
-        self.alpha, self.beta, self.gamma = 50, 50, 1.0/3
+        self.alpha, self.beta, self.gamma = 150, 150, 1.0/5
 
         # for gradient descent
         self.wiggle_size, self.step_size = 10e-5, 0.5
@@ -86,7 +86,9 @@ class Geometry:
             decrease = (self.prev_cost - cost) / self.step_size
 
             if abs(self.prev_cost - cost) < 0.5:
-                print('Finished optimizing!')
+                print('Finished optimizing! Final values are:')
+                print('tz: ' + str(self.top_height), 'rc: ' + str(self.square_tip_out), \
+                    'hc: ' + str(self.square_tip_up), 'ex: ' + str(self.line_out))
 
             if decrease < 0:
                 self.step_size /= 1.02

@@ -192,6 +192,8 @@ def main():
 
 if __name__ == '__main__': main()
 
+# for reference, best values: 'tz: 2.14374626606', 'rc: 1.86108676884', 'hc: 1.41201738716', 'ex: 2.20796050939'
+
 
 
 
