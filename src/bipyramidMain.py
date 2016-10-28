@@ -164,7 +164,7 @@ def keyboard(key,x,y):
     elif key == 'D':
         geom.gamma /= weight_multiple
     elif key == 'g':
-        geom.gradient_descent()
+        geom.take_step()
 
     glutPostRedisplay()
 
