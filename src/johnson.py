@@ -37,11 +37,12 @@ class Johnson:
                 [7,10],
             ]
 
+    # for interactive scaling
     scale_factor, weight_factor = 0.05, 1.05
 
 
     def __init__(self):
-        self.solid, self.plist = [], []
+        self.points = []
 
         # CHANGEABLE PARAMETERS
         self.scale = 2
@@ -58,34 +59,35 @@ class Johnson:
         self.prev_cost, self.cost_change = None, None
 
 
-    def update(self):
-        self.redraw()
-        self.solid = np.array(self.plist)
+    def translate(self, x, y, z):
+        for i in range(len(self.points)):
+            curr = self.points[i]
+            self.points[i] = [curr[0] + x, curr[1] + y, curr[2] + z]
 
 
     def redraw(self):
-        del self.plist[:]
+        del self.points[:]
 
         # top half top point
-        self.plist.append([0, 0, self.top_height])
+        self.points.append([0, 0, self.top_height])
 
         # calculations for top and bottom halves
         x_dist = sqrt(3) * self.square_tip_out / 2.0
         y_dist = self.square_tip_out / 2.0
 
         # top half corner top points
-        self.plist.append([0, self.square_tip_out, self.square_tip_up])
-        self.plist.append([-x_dist, -y_dist, self.square_tip_up])
-        self.plist.append([x_dist, -y_dist, self.square_tip_up])
+        self.points.append([0, self.square_tip_out, self.square_tip_up])
+        self.points.append([-x_dist, -y_dist, self.square_tip_up])
+        self.points.append([x_dist, -y_dist, self.square_tip_up])
 
 
         # bottom half bottom point
-        self.plist.append([0, 0, -self.top_height])
+        self.points.append([0, 0, -self.top_height])
 
         # bottom half corner bottom points
-        self.plist.append([0, self.square_tip_out, -self.square_tip_up])
-        self.plist.append([-x_dist, -y_dist, -self.square_tip_up])
-        self.plist.append([x_dist, -y_dist, -self.square_tip_up])
+        self.points.append([0, self.square_tip_out, -self.square_tip_up])
+        self.points.append([-x_dist, -y_dist, -self.square_tip_up])
+        self.points.append([x_dist, -y_dist, -self.square_tip_up])
 
         # calculations for connector line points
         x_offset = self.scale / 4.0
@@ -94,14 +96,14 @@ class Johnson:
         y_coord = self.line_out / 2.0
 
         # bottom bar connector line points
-        self.plist.append([self.scale/2.0, -self.line_out, 0])
-        self.plist.append([-self.scale/2.0, -self.line_out, 0])
+        self.points.append([self.scale/2.0, -self.line_out, 0])
+        self.points.append([-self.scale/2.0, -self.line_out, 0])
 
         # wing connector line points
-        self.plist.append([x_coord + x_offset, y_coord - y_offset, 0])
-        self.plist.append([x_coord - x_offset, y_coord + y_offset, 0])
-        self.plist.append([-x_coord - x_offset, y_coord - y_offset, 0])
-        self.plist.append([-x_coord + x_offset, y_coord + y_offset, 0])
+        self.points.append([x_coord + x_offset, y_coord - y_offset, 0])
+        self.points.append([x_coord - x_offset, y_coord + y_offset, 0])
+        self.points.append([-x_coord - x_offset, y_coord - y_offset, 0])
+        self.points.append([-x_coord + x_offset, y_coord + y_offset, 0])
 
 
     def take_step(self):
@@ -207,13 +209,13 @@ class Johnson:
             return sqrt(diff)
 
 
-        top_point_line = distance(self.plist[0], self.plist[1])
+        top_point_line = distance(self.points[0], self.points[1])
         diff_tops = abs(top_point_line - self.scale) * 6
 
-        square_line = distance(self.plist[5], self.plist[13])
+        square_line = distance(self.points[5], self.points[13])
         diff_squares = abs(square_line - self.scale) * 12
 
-        out_line = distance(self.plist[8], self.plist[9])
+        out_line = distance(self.points[8], self.points[9])
         diff_outs = abs(out_line - self.scale) * 4
 
         diff_total = diff_tops + diff_squares + diff_outs
@@ -253,16 +255,16 @@ class Johnson:
         # for the pentagons
         s_pentagon = 108 * 2 * pi / 360
 
-        top_edge_1 = vectorize(self.plist[0], self.plist[1])
-        top_edge_2 = vectorize(self.plist[0], self.plist[2])
+        top_edge_1 = vectorize(self.points[0], self.points[1])
+        top_edge_2 = vectorize(self.points[0], self.points[2])
         top_angle = angle(top_edge_1, top_edge_2)
 
-        top_edge = vectorize(self.plist[1], self.plist[0])
-        side_edge = vectorize(self.plist[1], self.plist[13])
+        top_edge = vectorize(self.points[1], self.points[0])
+        side_edge = vectorize(self.points[1], self.points[13])
         side_angle = angle(top_edge, side_edge)
 
-        side_edge_1 = vectorize(self.plist[13], self.plist[1])
-        line_out_edge = vectorize(self.plist[13], self.plist[12])
+        side_edge_1 = vectorize(self.points[13], self.points[1])
+        line_out_edge = vectorize(self.points[13], self.points[12])
         line_angle = angle(top_edge_1, line_out_edge)
 
         pentagon_devation = abs(top_angle - s_pentagon) + 2 * abs(side_angle - s_pentagon) \
@@ -273,12 +275,12 @@ class Johnson:
         # for the squares
         s_square = 90 * 2 * pi / 360
 
-        left_edge = vectorize(self.plist[1], self.plist[11])
-        right_edge = vectorize(self.plist[1], self.plist[13])
+        left_edge = vectorize(self.points[1], self.points[11])
+        right_edge = vectorize(self.points[1], self.points[13])
         top_angle = angle(left_edge, right_edge)
 
-        top_edge = vectorize(self.plist[11], self.plist[1])
-        bottom_edge = vectorize(self.plist[11], self.plist[5])
+        top_edge = vectorize(self.points[11], self.points[1])
+        bottom_edge = vectorize(self.points[11], self.points[5])
         edge_angle = angle(top_edge, bottom_edge)
 
         square_deviation = abs(top_angle - s_square) * 2 + abs(edge_angle - s_square) * 2
@@ -289,16 +291,16 @@ class Johnson:
 
     def planarity_cost(self):
 
-        def best_fit_plane(plist):
+        def best_fit_plane(points):
             a, b, c = 0, 0, 0
             p = (0, 0, 0)
-            n = len(plist)
+            n = len(points)
 
             for i in range(n):
-                a += (plist[i][1] - plist[(i+1) % n][1]) * (plist[i][2] + plist[(i+1) % n][2])
-                b += (plist[i][2] - plist[(i+1) % n][2]) * (plist[i][0] + plist[(i+1) % n][0])
-                c += (plist[i][0] - plist[(i+1) % n][0]) * (plist[i][1] + plist[(i+1) % n][1])
-                p = tuple(p[x] + plist[i][x] for x in range(len(p)))
+                a += (points[i][1] - points[(i+1) % n][1]) * (points[i][2] + points[(i+1) % n][2])
+                b += (points[i][2] - points[(i+1) % n][2]) * (points[i][0] + points[(i+1) % n][0])
+                c += (points[i][0] - points[(i+1) % n][0]) * (points[i][1] + points[(i+1) % n][1])
+                p = tuple(p[x] + points[i][x] for x in range(len(p)))
 
             p = tuple(p[x] / n for x in range(len(p)))
 
@@ -313,17 +315,17 @@ class Johnson:
             return d
 
 
-        def cost(plist):
+        def cost(points):
             planarity = 0
-            plane = best_fit_plane(plist)
-            for point in self.plist:
+            plane = best_fit_plane(points)
+            for point in self.points:
                 planarity += distance(point, plane)
             return planarity
 
 
-        p_list = [self.plist[0], self.plist[1], self.plist[3], self.plist[11], self.plist[10]]
+        p_list = [self.points[0], self.points[1], self.points[3], self.points[11], self.points[10]]
         pentagon = cost(p_list) * 6
-        s_list = [self.plist[2], self.plist[6], self.plist[9], self.plist[12]]
+        s_list = [self.points[2], self.points[6], self.points[9], self.points[12]]
         square = cost(s_list) * 4
 
         return (pentagon + square) * self.gamma

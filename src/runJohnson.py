@@ -7,6 +7,7 @@ import transform
 import numpy as np
 from johnson import Johnson
 
+
 eye = np.array([0.0,-13.0,1.5])
 up = np.array([0.0,0.0,1.0])
 
@@ -50,7 +51,7 @@ def mainDisplay():
 
     glEnd()
 
-    geom.update()
+    geom.redraw()
 
     glBegin(GL_LINES)
 
@@ -63,7 +64,7 @@ def mainDisplay():
         elif i == 9:
             glColor3f(0.0,0.0,1.0)
         for v in geom.edges[i]:
-            glVertex3fv(geom.solid[v])
+            glVertex3fv(geom.points[v])
 
     glEnd()
     glutSwapBuffers()
