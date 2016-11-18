@@ -145,8 +145,8 @@ class Johnson:
 
             # if step is better than last step
             elif decrease > self.cost_change:
-                self.step_size *= 1
-                # self.step_size *= 1.01
+                # self.step_size *= 1
+                self.step_size *= 1.01
 
             # if step is not as good but still beneficial
             else:
@@ -326,10 +326,8 @@ class Johnson:
 
         p_list = [self.points[0], self.points[1], self.points[3], self.points[11], self.points[10]]
         pentagon = cost(p_list) * 6
-        s_list = [self.points[2], self.points[6], self.points[9], self.points[12]]
-        square = cost(s_list) * 4
 
-        return (pentagon + square) * self.gamma
+        return pentagon * self.gamma
 
 
 # for reference, best values: 'tz: 2.14374626606', 'rc: 1.86108676884', 'hc: 1.41201738716', 'ex: 2.20796050939'

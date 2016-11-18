@@ -9,7 +9,7 @@ class SixRing:
     def __init__(self):
         self.ring = []
 
-        for _ in range(1):
+        for _ in range(6):
             self.ring.append(Johnson())
 
         self.redraw()
@@ -20,12 +20,12 @@ class SixRing:
             solid = self.ring[i]
             solid.redraw()
 
-            # rotation = rotate(- 60 * i, [0, 0, 1])
-            # for k in range(len(solid.points)):
-            #     solid.points[k] = np.dot(rotation, solid.points[k])
+            rotation = rotate(- 60 * i, [0, 0, 1])
+            for k in range(len(solid.points)):
+                solid.points[k] = np.dot(rotation, solid.points[k])
 
-            # d = sqrt(3) / 2.0 * solid.scale + solid.line_out
-            # solid.translate(d * sin(radians(60*i)), d * cos(radians(60*i)), 0)
+            d = sqrt(3) / 2.0 * solid.scale + solid.line_out
+            solid.translate(d * sin(radians(60*i)), d * cos(radians(60*i)), 0)
 
 
     def stats(self):
