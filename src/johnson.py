@@ -1,11 +1,44 @@
-from math import sqrt
 import numpy as np 
-import transformations as tf 
-from math import sqrt, pi, acos, degrees
+from math import sqrt, pi, acos
 
-class Geometry:
 
-    origin, xaxis, yaxis, zaxis = (0, 0, 0), (1, 0, 0), (0, 1, 0), (0, 0, 1)
+class Johnson:
+
+    edges = [
+                # top edges
+                [0,1],
+                [0,2],
+                [0,3],
+
+                #bottom edges
+                [4,5],
+                [4,6],
+                [4,7],
+
+                # line outs
+                [8,9],
+                [10,11],
+                [12,13],
+
+                #top edges to line outs
+                [1,11],
+                [3,10],
+                [1,13],
+                [2,12],
+                [2,9],
+                [3,8],
+
+                #bottom edges to line outs
+                [5,11],
+                [5,13],
+                [6,9],
+                [6,12],
+                [7,8],
+                [7,10],
+            ]
+
+    scale_factor, weight_factor = 0.05, 1.05
+
 
     def __init__(self):
         self.solid, self.plist = [], []
@@ -18,15 +51,17 @@ class Geometry:
         self.line_out = 1.5 * self.scale
 
         # cost function weights
-        self.alpha, self.beta, self.gamma = 150, 150, 1.0/5
+        self.alpha, self.beta, self.gamma = 150, 150, 30
 
         # for gradient descent
         self.wiggle_size, self.step_size = 10e-5, 0.5
         self.prev_cost, self.cost_change = None, None
 
-    def buildGeometry(self):
+
+    def update(self):
         self.redraw()
         self.solid = np.array(self.plist)
+
 
     def redraw(self):
         del self.plist[:]
@@ -42,6 +77,7 @@ class Geometry:
         self.plist.append([0, self.square_tip_out, self.square_tip_up])
         self.plist.append([-x_dist, -y_dist, self.square_tip_up])
         self.plist.append([x_dist, -y_dist, self.square_tip_up])
+
 
         # bottom half bottom point
         self.plist.append([0, 0, -self.top_height])
@@ -67,16 +103,19 @@ class Geometry:
         self.plist.append([-x_coord - x_offset, y_coord - y_offset, 0])
         self.plist.append([-x_coord + x_offset, y_coord + y_offset, 0])
 
+
     def take_step(self):
 
         #handle first two calls to set up comparisons for future
         if self.prev_cost == None:
             self.prev_cost = self.cost()[3]
+
         elif self.cost_change == None:
             self.gradient_descent()
             cost = self.cost()[3]
             self.cost_change = (self.prev_cost - cost) / self.step_size
             self.prev_cost = cost
+
 
         # take most beneficial step
         else:
@@ -90,8 +129,9 @@ class Geometry:
                 print('tz: ' + str(self.top_height), 'rc: ' + str(self.square_tip_out), \
                     'hc: ' + str(self.square_tip_up), 'ex: ' + str(self.line_out))
 
+
             if decrease < 0:
-                self.step_size /= 1.02
+                self.step_size /= 1.03
 
             # if step is better than last step
             elif decrease > self.cost_change:
@@ -104,6 +144,7 @@ class Geometry:
                 self.wiggle_size /= 1.001
 
             self.cost_change, self.prev_cost = decrease, cost
+
 
     def gradient_descent(self):
         self.redraw()
@@ -134,6 +175,7 @@ class Geometry:
         line_out_step = line_out_cost * self.step_size * -1
         self.line_out -= self.wiggle_size
 
+
         # take gradient descent step in direction of most decrease
         self.top_height += top_height_step
         self.square_tip_out += square_tip_out_step
@@ -142,10 +184,19 @@ class Geometry:
 
         self.redraw()
 
+
+    def stats(self):
+        l_cost, a_cost, p_cost, t_cost = self.cost()
+
+        return 'length cost: ' + str(l_cost), 'angle cost: ' + str(a_cost), \
+               'planarity cost: ' + str(p_cost), 'total cost: ' + str(t_cost)
+
+
     def cost(self):
         a, b, c = self.length_cost(), self.angle_cost(), self.planarity_cost()
         t = a + b + c
         return (a, b, c, t)
+
 
     def length_cost(self):
 
@@ -154,6 +205,7 @@ class Geometry:
             for i in range(len(point1)):
                 diff += (point1[i] - point2[i]) ** 2
             return sqrt(diff)
+
 
         top_point_line = distance(self.plist[0], self.plist[1])
         diff_tops = abs(top_point_line - self.scale) * 6
@@ -166,6 +218,7 @@ class Geometry:
 
         diff_total = diff_tops + diff_squares + diff_outs
         return diff_total * self.alpha
+
 
     def angle_cost(self):
 
@@ -187,11 +240,13 @@ class Geometry:
 
             return acos(fraction)
 
+
         def vectorize(point1, point2):
             vec = []
             for i in range(len(point1)):
                 vec.append(point2[i] - point1[i])
             return vec
+
 
         sum_deviations = 0
 
@@ -214,6 +269,7 @@ class Geometry:
                             + 2 * abs(line_angle - s_pentagon)
         sum_deviations += 6 * pentagon_devation
 
+
         # for the squares
         s_square = 90 * 2 * pi / 360
 
@@ -229,6 +285,7 @@ class Geometry:
         sum_deviations += 3 * square_deviation
 
         return sum_deviations * self.beta
+
 
     def planarity_cost(self):
 
@@ -249,10 +306,12 @@ class Geometry:
 
             return (a, b, c, d)
 
+
         def distance(point, plane):
             d = abs(plane[0]*point[0] + plane[1]*point[1] + plane[2]*point[2] + plane[3])
             d /= sqrt(plane[0]**2 + plane[1]**2 + plane[2]**2)
             return d
+
 
         def cost(plist):
             planarity = 0
@@ -260,6 +319,7 @@ class Geometry:
             for point in self.plist:
                 planarity += distance(point, plane)
             return planarity
+
 
         p_list = [self.plist[0], self.plist[1], self.plist[3], self.plist[11], self.plist[10]]
         pentagon = cost(p_list) * 6
@@ -269,9 +329,7 @@ class Geometry:
         return (pentagon + square) * self.gamma
 
 
-
-
-
+# for reference, best values: 'tz: 2.14374626606', 'rc: 1.86108676884', 'hc: 1.41201738716', 'ex: 2.20796050939'
 
         
 
