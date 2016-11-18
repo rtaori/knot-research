@@ -5,60 +5,25 @@ import sys
 import math
 import transform
 import numpy as np
-import bipyramid as bd
+from johnson import Johnson
+
+
 eye = np.array([0.0,-13.0,1.5])
 up = np.array([0.0,0.0,1.0])
 
-prevX = 0
-prevY = 0
-r = 0
+prevX, prevY = 0, 0
 
-edges = [
-# top edges
-[0,1],
-[0,2],
-[0,3],
-#bottom edges
-[4,5],
-[4,6],
-[4,7],
-# line outs
-[8,9],
-[10,11],
-[12,13],
-#top edges to line outs
-[1,11],
-[3,10],
-[1,13],
-[2,12],
-[2,9],
-[3,8],
-#bottom edges to line outs
-[5,11],
-[5,13],
-[6,9],
-[6,12],
-[7,8],
-[7,10],
-]
+geom = Johnson()
 
-scale_multiple = 0.05
-weight_multiple = 1.05
-
-geom = bd.Geometry()
 
 def init():
-    glClearColor(0.0, 0.0, 0.0, 1.0); # Set background color to black and opaque
-    glClearDepth(1.0);                   # Set background depth to farthest
-    glEnable(GL_DEPTH_TEST);   # Enable depth testing for z-culling
-    glDepthFunc(GL_LEQUAL);    # Set the type of depth-test
-    glShadeModel(GL_SMOOTH);   # Enable smooth shading
+    glClearColor(0.0, 0.0, 0.0, 1.0);
+    glClearDepth(1.0);
+    glEnable(GL_DEPTH_TEST);
+    glDepthFunc(GL_LEQUAL);
+    glShadeModel(GL_SMOOTH);
     glHint(GL_PERSPECTIVE_CORRECTION_HINT, GL_NICEST);
 
-def print_stats():
-    l_cost, a_cost, p_cost, t_cost = geom.cost()
-    print('length cost: ' + str(l_cost), 'angle cost: ' + str(a_cost), \
-        'planarity cost: ' + str(p_cost), 'total cost: ' + str(t_cost))
 
 def mainDisplay():
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
@@ -68,14 +33,17 @@ def mainDisplay():
 
     gluLookAt(eye[0],eye[1],eye[2],  0,0,0,  up[0],up[1],up[2])
     glBegin(GL_LINES)
+
     # x axis
     glColor3f(0.5, 1.0, 1.0) 
     glVertex3f(0.0,0.0,0.0)
     glVertex3f(15.0,0.0,0.0)
+
     # y axis
     glColor3f(1.0, 0.5, 1.0) 
     glVertex3f(0.0,0.0,0.0)
     glVertex3f(0.0,15.0,0.0)
+
     # z axis
     glColor3f(1.0, 1.0, 0.5) 
     glVertex3f(0.0,0.0,0.0)
@@ -83,26 +51,26 @@ def mainDisplay():
 
     glEnd()
 
-    #Draw Geometry
-    global geom
-    geom.buildGeometry()
+    geom.redraw()
 
     glBegin(GL_LINES)
 
-    for i in range(len(edges)):
+    # change color for easier viewing
+    for i in range(len(geom.edges)):
         if i == 0:
             glColor3f(1.0, 0.0, 0.0) 
         elif i == 6:
             glColor3f(0.0,1.0,0.0)
         elif i == 9:
             glColor3f(0.0,0.0,1.0)
-        for v in edges[i]:
-            glVertex3fv(geom.solid[v])
-    glEnd()
+        for v in geom.edges[i]:
+            glVertex3fv(geom.points[v])
 
+    glEnd()
     glutSwapBuffers()
 
-    print_stats()
+    print(geom.stats())
+
 
 def mainReshape(w,h):
     if h == 0:
@@ -114,8 +82,10 @@ def mainReshape(w,h):
     glMatrixMode(GL_MODELVIEW)
     glLoadIdentity()
 
+
 def idle():
     glutPostRedisplay()
+
 
 def drag(x,y):
     global prevX
@@ -131,42 +101,44 @@ def drag(x,y):
     prevY = y
     glutPostRedisplay()
 
+
 def keyboard(key,x,y):
     global geom
     if key == 27:
         exit(0)
     elif key == '1':
-        geom.top_height += scale_multiple
+        geom.top_height += geom.scale_factor
     elif key == '!':
-        geom.top_height -= scale_multiple
+        geom.top_height -= geom.scale_factor
     elif key == '2':
-        geom.square_tip_out += scale_multiple
+        geom.square_tip_out += geom.scale_factor
     elif key == '@':
-        geom.square_tip_out -= scale_multiple
+        geom.square_tip_out -= geom.scale_factor
     elif key == '3':
-        geom.square_tip_up += scale_multiple
+        geom.square_tip_up += geom.scale_factor
     elif key == '#':
-        geom.square_tip_up -= scale_multiple
+        geom.square_tip_up -= geom.scale_factor
     elif key == '4':
-        geom.line_out += scale_multiple
+        geom.line_out += geom.scale_factor
     elif key == '$':
-        geom.line_out -= scale_multiple
+        geom.line_out -= geom.scale_factor
     elif key == 'a':
-        geom.alpha *= weight_multiple
+        geom.alpha *= geom.weight_factor
     elif key == 'A':
-        geom.alpha /= weight_multiple
+        geom.alpha /= geom.weight_factor
     elif key == 's':
-        geom.beta *= weight_multiple
+        geom.beta *= geom.weight_factor
     elif key == 'S':
-        geom.beta /= weight_multiple
+        geom.beta /= geom.weight_factor
     elif key == 'd':
-        geom.gamma *= weight_multiple
+        geom.gamma *= geom.weight_factor
     elif key == 'D':
-        geom.gamma /= weight_multiple
+        geom.gamma /= geom.weight_factor
     elif key == 'g':
         geom.take_step()
 
     glutPostRedisplay()
+
 
 def mouse(button,state,x,y):
     global prevX
@@ -175,12 +147,13 @@ def mouse(button,state,x,y):
         prevX = 0
         prevY = 0
 
+
 def main():
     glutInit(sys.argv)
     glutInitDisplayMode(GLUT_DOUBLE)
     glutInitWindowSize(640, 480)
     glutInitWindowPosition(0, 0)
-    glutCreateWindow("Solid")
+    glutCreateWindow("Johnson")
     glutDisplayFunc(mainDisplay)
     glutReshapeFunc(mainReshape)
     glutMotionFunc(drag)
@@ -190,9 +163,9 @@ def main():
     glutMainLoop()
     return
 
+
 if __name__ == '__main__': main()
 
-# for reference, best values: 'tz: 2.14374626606', 'rc: 1.86108676884', 'hc: 1.41201738716', 'ex: 2.20796050939'
 
 
 
