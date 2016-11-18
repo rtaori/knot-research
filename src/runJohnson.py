@@ -6,6 +6,7 @@ import math
 import transform
 import numpy as np
 from johnson import Johnson
+from sixring import SixRing
 
 
 eye = np.array([0.0,-13.0,1.5])
@@ -13,7 +14,7 @@ up = np.array([0.0,0.0,1.0])
 
 prevX, prevY = 0, 0
 
-geom = Johnson()
+geom = SixRing()
 
 
 def init():
@@ -55,16 +56,17 @@ def mainDisplay():
 
     glBegin(GL_LINES)
 
-    # change color for easier viewing
-    for i in range(len(geom.edges)):
-        if i == 0:
-            glColor3f(1.0, 0.0, 0.0) 
-        elif i == 6:
-            glColor3f(0.0,1.0,0.0)
-        elif i == 9:
-            glColor3f(0.0,0.0,1.0)
-        for v in geom.edges[i]:
-            glVertex3fv(geom.points[v])
+    for solid in geom.ring:
+        # change color for easier viewing
+        for i in range(len(solid.edges)):
+            if i == 0:
+                glColor3f(1.0, 0.0, 0.0) 
+            elif i == 6:
+                glColor3f(0.0,1.0,0.0)
+            elif i == 9:
+                glColor3f(0.0,0.0,1.0)
+            for v in solid.edges[i]:
+                glVertex3fv(solid.points[v])
 
     glEnd()
     glutSwapBuffers()
@@ -107,33 +109,29 @@ def keyboard(key,x,y):
     if key == 27:
         exit(0)
     elif key == '1':
-        geom.top_height += geom.scale_factor
+        geom.adjust_top_height(1)
     elif key == '!':
-        geom.top_height -= geom.scale_factor
-    elif key == '2':
-        geom.square_tip_out += geom.scale_factor
-    elif key == '@':
-        geom.square_tip_out -= geom.scale_factor
+        geom.adjust_top_height(-1)
     elif key == '3':
-        geom.square_tip_up += geom.scale_factor
+        geom.adjust_square_tip_up(1)
     elif key == '#':
-        geom.square_tip_up -= geom.scale_factor
+        geom.adjust_square_tip_up(-1)
     elif key == '4':
-        geom.line_out += geom.scale_factor
+        geom.adjust_line_out(1)
     elif key == '$':
-        geom.line_out -= geom.scale_factor
+        geom.adjust_line_out(-1)
     elif key == 'a':
-        geom.alpha *= geom.weight_factor
+        geom.adjust_alpha(1)
     elif key == 'A':
-        geom.alpha /= geom.weight_factor
+        geom.adjust_alpha(-1)
     elif key == 's':
-        geom.beta *= geom.weight_factor
+        geom.adjust_beta(1)
     elif key == 'S':
-        geom.beta /= geom.weight_factor
+        geom.adjust_beta(-1)
     elif key == 'd':
-        geom.gamma *= geom.weight_factor
+        geom.adjust_gamma(1)
     elif key == 'D':
-        geom.gamma /= geom.weight_factor
+        geom.adjust_gamma(-1)
     elif key == 'g':
         geom.take_step()
 

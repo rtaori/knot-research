@@ -44,12 +44,16 @@ class Johnson:
     def __init__(self):
         self.points = []
 
+        self.scale = 1.2
         # CHANGEABLE PARAMETERS
-        self.scale = 2
         self.top_height = 1.75 * self.scale
-        self.square_tip_out = 1.25 * self.scale
-        self.square_tip_up = 1 * self.scale
+        self.square_tip_up = 1.0 * self.scale
         self.line_out = 1.5 * self.scale
+
+        # to make square faces planar for ring
+        numer = 3*self.scale**2 +4*sqrt(3)*self.line_out*self.scale + 4*self.line_out**2
+        self.square_tip_out = sqrt(numer) / 4.0
+        
 
         # cost function weights
         self.alpha, self.beta, self.gamma = 150, 150, 30
@@ -66,7 +70,12 @@ class Johnson:
 
 
     def redraw(self):
+        # to make square faces planar for ring
+        numer = 3*self.scale**2 +4*sqrt(3)*self.line_out*self.scale + 4*self.line_out**2
+        self.square_tip_out = sqrt(numer) / 4.0
+
         del self.points[:]
+        
 
         # top half top point
         self.points.append([0, 0, self.top_height])
@@ -121,7 +130,6 @@ class Johnson:
 
         # take most beneficial step
         else:
-            values = (self.top_height, self.square_tip_out, self.square_tip_up, self.line_out)
             self.gradient_descent()
             cost = self.cost()[3]
             decrease = (self.prev_cost - cost) / self.step_size
@@ -159,12 +167,6 @@ class Johnson:
         top_height_step = top_height_cost * self.step_size * -1
         self.top_height -= self.wiggle_size
 
-        self.square_tip_out += self.wiggle_size
-        self.redraw()
-        square_tip_out_cost = self.cost()[3] - norm_cost
-        square_tip_out_step = square_tip_out_cost * self.step_size * -1
-        self.square_tip_out -= self.wiggle_size
-
         self.square_tip_up += self.wiggle_size
         self.redraw()
         square_tip_up_cost = self.cost()[3] - norm_cost
@@ -180,7 +182,6 @@ class Johnson:
 
         # take gradient descent step in direction of most decrease
         self.top_height += top_height_step
-        self.square_tip_out += square_tip_out_step
         self.square_tip_up += square_tip_up_step
         self.line_out += line_out_step
 
